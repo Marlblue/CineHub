@@ -40,6 +40,7 @@ const MovieCard: React.FC<MovieCardProps> = ({ movie }) => {
     <Link
       to={`/movie/${movie.id}`}
       className="block bg-gray-800 rounded-lg overflow-hidden hover:scale-105 transition-transform duration-200 group"
+      aria-label={`View details for ${movie.title}`}
     >
       <div className="relative aspect-2/3 bg-gray-700">
         {!imageError ? (
@@ -51,7 +52,7 @@ const MovieCard: React.FC<MovieCardProps> = ({ movie }) => {
               ${getImageUrl(movie.poster_path, "w780")} 780w
             `}
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-            alt={movie.title}
+            alt={`Poster for ${movie.title}`}
             className="w-full h-full object-cover transition-opacity duration-300"
             loading="lazy"
             onError={() => setImageError(true)}

@@ -1,7 +1,8 @@
-import { lazy } from "react";
+import { lazy, Suspense } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Layout from "./components/Layout";
 import { Toaster } from "react-hot-toast";
+import LoadingSpinner from "./components/LoadingSpinner";
 
 const Home = lazy(() => import("./pages/Home"));
 const MovieDetail = lazy(() => import("./pages/MovieDetail"));
@@ -21,15 +22,17 @@ function App() {
           },
         }}
       />
-      <Routes>
-        <Route element={<Layout />}>
-          <Route path="/" element={<Home />} />
-          <Route path="/movie/:id" element={<MovieDetail />} />
-          <Route path="/person/:id" element={<PersonDetail />} />
-          <Route path="/watchlist" element={<Watchlist />} />
-          <Route path="*" element={<NotFound />} />
-        </Route>
-      </Routes>
+      <Suspense fallback={<LoadingSpinner />}>
+        <Routes>
+          <Route element={<Layout />}>
+            <Route path="/" element={<Home />} />
+            <Route path="/movie/:id" element={<MovieDetail />} />
+            <Route path="/person/:id" element={<PersonDetail />} />
+            <Route path="/watchlist" element={<Watchlist />} />
+            <Route path="*" element={<NotFound />} />
+          </Route>
+        </Routes>
+      </Suspense>
     </BrowserRouter>
   );
 }
