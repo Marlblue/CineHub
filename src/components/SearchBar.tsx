@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Search } from "lucide-react";
+import { Search, X } from "lucide-react";
 import { useDebounce } from "../hooks/useDebounce";
 
 interface SearchBarProps {
@@ -15,17 +15,32 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSearch }) => {
   }, [debouncedValue, onSearch]);
 
   return (
-    <div className="relative w-full max-w-xl mx-auto mb-8">
-      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-        <Search className="h-5 w-5 text-gray-400" />
+    <div className="relative w-full max-w-2xl mx-auto group">
+      {/* Glow effect on focus */}
+      <div className="absolute -inset-0.5 bg-linear-to-r from-cinema-accent/20 to-cinema-rose/20 rounded-2xl blur-sm opacity-0 group-focus-within:opacity-100 transition-opacity duration-500" />
+
+      <div className="relative flex items-center">
+        <div className="absolute left-4 flex items-center pointer-events-none">
+          <Search className="h-5 w-5 text-gray-500 group-focus-within:text-cinema-accent transition-colors duration-300" />
+        </div>
+        <input
+          type="text"
+          className="block w-full pl-12 pr-12 py-3.5 border border-cinema-border rounded-xl bg-cinema-card/80 backdrop-blur-sm text-white placeholder-gray-500 focus:outline-none focus:border-cinema-accent/50 focus:bg-cinema-card transition-all duration-300 text-sm"
+          placeholder="Search for movies..."
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+          id="search-movies"
+        />
+        {value && (
+          <button
+            onClick={() => setValue("")}
+            className="absolute right-4 p-1 text-gray-500 hover:text-white transition-colors rounded-full hover:bg-white/10"
+            aria-label="Clear search"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        )}
       </div>
-      <input
-        type="text"
-        className="block w-full pl-10 pr-3 py-2 border border-gray-700 rounded-lg leading-5 bg-gray-800 text-gray-300 placeholder-gray-400 focus:outline-none focus:bg-gray-700 focus:border-blue-500 transition duration-150 ease-in-out"
-        placeholder="Search for movies..."
-        value={value}
-        onChange={(e) => setValue(e.target.value)}
-      />
     </div>
   );
 };

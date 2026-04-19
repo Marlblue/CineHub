@@ -2,11 +2,14 @@ import React from "react";
 
 const LoadingSpinner: React.FC = () => {
   return (
-    <div className="flex items-center justify-center min-h-[50vh] w-full">
-      <div className="relative w-16 h-16">
-        <div className="absolute top-0 left-0 w-full h-full border-4 border-gray-700 rounded-full"></div>
-        <div className="absolute top-0 left-0 w-full h-full border-4 border-blue-500 rounded-full animate-spin border-t-transparent"></div>
+    <div className="flex flex-col items-center justify-center min-h-[50vh] w-full gap-4">
+      {/* Cinema-themed spinner */}
+      <div className="relative w-14 h-14">
+        <div className="absolute inset-0 rounded-full border-2 border-cinema-border" />
+        <div className="absolute inset-0 rounded-full border-2 border-transparent border-t-cinema-accent animate-spin" />
+        <div className="absolute inset-2 rounded-full border-2 border-transparent border-t-cinema-rose animate-spin [animation-direction:reverse] [animation-duration:0.8s]" />
       </div>
+      <p className="text-sm text-gray-500 animate-pulse">Loading...</p>
     </div>
   );
 };
