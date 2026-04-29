@@ -1,141 +1,87 @@
-# 🎬 CineHub
+<div align="center">
 
-A modern movie discovery web application built with **React 19**, **TypeScript**, and the **TMDB API**. Browse trending films, search by title, explore genres, view detailed cast & crew info, watch trailers, and manage a personal watchlist — all with a sleek, responsive dark-themed UI.
+# 🎬 CINEHUB
+### The Ultimate Premium Movie Discovery Experience
 
-> **Live Demo:** [cinehub.netlify.app](https://cinehub.netlify.app) *(update with your actual URL)*
-
----
-
-## ✨ Features
-
-- 🔥 **Trending Movies** — Weekly trending films powered by TMDB with infinite scroll
-- 🔍 **Real-time Search** — Debounced search-as-you-type with paginated results
-- 🎭 **Genre Filtering** — Discover movies by genre categories
-- 🎬 **Movie Details** — Full movie info including synopsis, ratings, runtime, revenue, and YouTube trailers
-- 👤 **Cast & Crew** — Actor/director profiles with filmography
-- 📋 **Watchlist** — Persistent watchlist saved to `localStorage` with toast notifications
-- ⚡ **Lazy Loading** — Code-split pages for optimal bundle size
-- 🛡️ **Error Handling** — React Error Boundary + graceful API error states
-- 🔎 **SEO** — Dynamic `<head>` meta tags via `react-helmet-async`
+[![React](https://img.shields.io/badge/React-19.2-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind-4.1-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Vite](https://img.shields.io/badge/Vite-7.2-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev/)
 
 ---
 
-## 🛠️ Tech Stack
+**CineHub** is a high-end, immersive web application designed for cinema enthusiasts. Built with cutting-edge technology, it delivers a stunning cinematic browsing experience featuring fluid animations, glassmorphism aesthetics, and real-time data powered by TMDB.
 
-### Frontend
+[**Live Demo**](https://cinehub.netlify.app) | [**Get Started**](#-getting-started)
 
-| Technology | Version | Purpose |
-|---|---|---|
-| [React](https://react.dev/) | 19.2 | UI framework with hooks, Context API, lazy/Suspense |
-| [TypeScript](https://www.typescriptlang.org/) | 5.9 | Static typing & type-safe API responses |
-| [Vite](https://vite.dev/) | 7.2 | Build tool, HMR, dev server with API proxy |
-| [Tailwind CSS](https://tailwindcss.com/) | 4.1 | Utility-first CSS via `@tailwindcss/vite` plugin |
-| [React Router](https://reactrouter.com/) | 7.13 | Client-side routing with nested layouts |
-| [TanStack Query](https://tanstack.com/query) | 5.x | Server state management, caching, infinite queries |
-| [Axios](https://axios-http.com/) | 1.x | HTTP client with typed request/response |
-| [Lucide React](https://lucide.dev/) | 0.563 | Icon library |
-| [React Hot Toast](https://react-hot-toast.com/) | 2.6 | Toast notification system |
-| [React Helmet Async](https://github.com/staylor/react-helmet-async) | 2.0 | Dynamic SEO meta tags |
+</div>
 
-### Backend / Infrastructure
+## ✨ Key Features
 
-| Technology | Purpose |
+- 🎭 **Cinematic Glass-UI** — A premium design system utilizing deep gradients, backdrop filters, and mesh backgrounds for a truly immersive feel.
+- 🔥 **Trending & Discover** — Real-time updates on what's hot in the world of cinema, powered by the TMDB API.
+- 🔍 **Pro Search Experience** — Instant, debounced search results with a sleek overlay interface and visual feedback.
+- 📋 **Persistent Watchlist** — Save your "must-watch" movies to your personal collection, synced with local storage.
+- 🎬 **Deep Movie Insights** — Comprehensive details including cast profiles, trailers, and intelligent recommendations.
+- 📱 **Adaptive Design** — Perfectly optimized for everything from ultra-wide monitors to the smallest smartphone screens.
+- ⚡ **Turbocharged Performance** — Leveraging React 19's speed, TanStack Query caching, and skeleton loading states for a lag-free experience.
+
+## 🛠️ Modern Tech Stack
+
+| Layer | Technology |
 |---|---|
-| [Netlify Functions](https://www.netlify.com/products/functions/) | Serverless proxy to hide TMDB API key from client |
-| [TMDB API](https://developer.themoviedb.org/) | Movie database — trending, search, details, credits, videos |
+| **Frontend** | React 19.2 (Functional Components, Context API) |
+| **Framework** | Vite 7.2 (Lightning fast HMR & builds) |
+| **Styling** | Tailwind CSS v4.1 (Modern JIT engine & native CSS variables) |
+| **State Management** | TanStack Query v5 (Server State) + React Context (Client State) |
+| **Routing** | React Router v7.13 |
+| **Data Source** | TMDB (The Movie Database) API |
+| **Icons** | Lucide React |
 
-### Developer Tooling
+## 🏗️ Project Structure
 
-| Tool | Purpose |
-|---|---|
-| [Vitest](https://vitest.dev/) | Unit testing framework (Vite-native) |
-| [Testing Library](https://testing-library.com/) | React component testing (`@testing-library/react`) |
-| [jsdom](https://github.com/jsdom/jsdom) | Browser environment for tests |
-| [ESLint](https://eslint.org/) | Linting with `react-hooks` & `react-refresh` plugins |
-| [TypeScript ESLint](https://typescript-eslint.io/) | Type-aware linting rules |
-| [pnpm](https://pnpm.io/) | Fast, disk-efficient package manager |
-
----
-
-## 🏗️ Architecture
-
-```
+```bash
 src/
-├── api/            # Axios client & TMDB API functions (typed)
-├── components/     # Reusable UI (Navbar, MovieCard, SEO, ErrorBoundary, etc.)
-├── context/        # React Context (WatchlistProvider with localStorage)
-├── hooks/          # Custom hooks (useMovies, useDebounce, usePerson)
-├── pages/          # Route pages (Home, MovieDetail, PersonDetail, Watchlist)
-├── types/          # TypeScript interfaces for TMDB API responses
-├── test/           # Test setup & component tests
-├── App.tsx         # Router config with lazy-loaded routes
-└── main.tsx        # Entry point — providers (Query, Helmet, Watchlist, ErrorBoundary)
-
-netlify/
-└── functions/
-    └── tmdb.js     # Serverless proxy — injects API key server-side
+├── api/            # TMDB API Client & Axios configuration
+├── components/     # UI Components (Navbar, MovieCard, Layout, etc.)
+├── context/        # Global State (Watchlist, Search, Language)
+├── hooks/          # Custom React Query hooks for data fetching
+├── pages/          # Full-page route components
+├── types/          # TypeScript interfaces for TMDB data
+└── utils/          # Helper functions (Formatting, Image URLs, Translations)
 ```
-
-### Key Architectural Decisions
-
-- **API Key Security** — TMDB API key is injected server-side via Netlify Functions, never exposed to the client bundle
-- **Server State vs. Client State** — TanStack Query handles all API data (caching, refetching, pagination); React Context is only used for client-side watchlist
-- **Code Splitting** — All page components are `React.lazy()` loaded with a shared `<Suspense>` fallback
-- **Infinite Scroll** — `useInfiniteQuery` for trending, discover, and search — loads next page on demand
-- **Debounced Search** — Custom `useDebounce` hook prevents excessive API calls during typing
-
----
 
 ## 🚀 Getting Started
 
-### Prerequisites
-
-- Node.js ≥ 18
-- pnpm (or npm/yarn)
-- [TMDB API Key](https://developer.themoviedb.org/docs/getting-started)
-
-### Installation
-
+### 1. Clone the repository
 ```bash
-# Clone the repository
-git clone https://github.com/your-username/cinehub.git
-cd cinehub
-
-# Install dependencies
-pnpm install
-
-# Create environment file
-cp .env.example .env
-# Add your TMDB API key to .env:
-# VITE_TMDB_API_KEY=your_api_key_here
-
-# Start development server
-pnpm dev
+git clone https://github.com/Marlblue/CineHub.git
+cd CineHub
 ```
 
-### Available Scripts
+### 2. Install dependencies
+We recommend using **pnpm** for faster and more efficient dependency management.
+```bash
+pnpm install
+```
 
-| Command | Description |
-|---|---|
-| `pnpm dev` | Start Vite dev server with HMR & API proxy |
-| `pnpm build` | Type-check with `tsc` then build for production |
-| `pnpm preview` | Preview production build locally |
-| `pnpm test` | Run unit tests with Vitest |
-| `pnpm lint` | Lint codebase with ESLint |
+### 3. Set up Environment Variables
+Create a `.env` file in the root directory and add your TMDB API Key:
+```env
+VITE_TMDB_API_KEY=your_api_key_here
+```
 
----
+### 4. Launch the Development Server
+```bash
+pnpm dev
+```
+Open [http://localhost:5173](http://localhost:5173) in your browser to see the results.
 
-## 📦 Deployment
-
-CineHub is configured for **Netlify** deployment out of the box:
-
-- `netlify.toml` defines build settings and redirect rules
-- Netlify Functions proxy handles `/api/tmdb/*` routes
-- SPA fallback redirects all routes to `index.html`
-- Set `VITE_TMDB_API_KEY` in Netlify environment variables
 
 ---
 
-## 📄 License
-
-This project is open source and available under the [MIT License](LICENSE).
+<div align="center">
+Built with ❤️ for Movie Lovers worldwide.
+<br/>
+© 2026 CineHub Project
+</div>

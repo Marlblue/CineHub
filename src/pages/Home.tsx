@@ -1,278 +1,274 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import {
   useTrendingMovies,
   useSearchMovies,
-  useGenres,
-  useDiscoverMovies,
+  useTopRatedMovies,
+  useTrendingMoviesPaged,
+  useSearchMoviesPaged,
 } from "../hooks/useMovies";
+import { getTrendingMovies, searchMovies } from "../api/tmdbClient";
 import MovieCard from "../components/MovieCard";
 import MovieCardSkeleton from "../components/MovieCardSkeleton";
-import SearchBar from "../components/SearchBar";
-import { Loader2, Star, TrendingUp, Sparkles } from "lucide-react";
+import { Loader2, Star, TrendingUp, Play, Sparkles, ChevronLeft, ChevronRight } from "lucide-react";
 import SEO from "../components/SEO";
 import { getImageUrl } from "../utils/image";
+import { useSearch } from "../context/SearchContext";
+import { useLanguage } from "../context/LanguageContext";
+import { t } from "../utils/translations";
 
 const Home = () => {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedGenre, setSelectedGenre] = useState<number | null>(null);
+  const { searchQuery } = useSearch();
+  const [activeSlide, setActiveSlide] = useState(0);
+  const [displayMovies, setDisplayMovies] = useState<any[]>([]);
+  const [tmdbPage, setTmdbPage] = useState(1);
+  const [isBatchLoading, setIsBatchLoading] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
 
-  const { data: genresData } = useGenres();
+  // Still need infinite for the Hero slider (gets page 1)
+  const { data: trendingInfinite } = useTrendingMovies();
+  const featuredMovies = trendingInfinite?.pages[0]?.results.slice(0, 10) || [];
+  const { data: topRatedData } = useTopRatedMovies();
 
-  const {
-    data: trendingData,
-    isLoading: isTrendingLoading,
-    error: trendingError,
-    fetchNextPage: fetchNextTrending,
-    hasNextPage: hasNextTrending,
-    isFetchingNextPage: isFetchingNextTrending,
-  } = useTrendingMovies();
-
-  const {
-    data: discoverData,
-    isLoading: isDiscoverLoading,
-    error: discoverError,
-    fetchNextPage: fetchNextDiscover,
-    hasNextPage: hasNextDiscover,
-    isFetchingNextPage: isFetchingNextDiscover,
-  } = useDiscoverMovies(selectedGenre);
-
-  const {
-    data: searchData,
-    isLoading: isSearchLoading,
-    error: searchError,
-    fetchNextPage: fetchNextSearch,
-    hasNextPage: hasNextSearch,
-    isFetchingNextPage: isFetchingNextSearch,
-  } = useSearchMovies(searchQuery);
-
+  const { language } = useLanguage();
   const isSearching = !!searchQuery;
-  const isFiltering = !!selectedGenre && !isSearching;
 
-  const getActiveContent = () => {
-    if (isSearching) {
-      return {
-        isLoading: isSearchLoading,
-        error: searchError,
-        movies: searchData?.pages.flatMap((page) => page.results),
-        hasNextPage: hasNextSearch,
-        isFetchingNextPage: isFetchingNextSearch,
-        fetchNextPage: fetchNextSearch,
-      };
+  // Function to fetch 36 movies (requires ~2 TMDB pages)
+  const fetchBatch = async (startPage: number, query?: string) => {
+    setIsBatchLoading(true);
+    try {
+      let p1, p2;
+      if (query) {
+        const res1 = await searchMovies(query, startPage, language);
+        const res2 = await searchMovies(query, startPage + 1, language);
+        p1 = res1.results;
+        p2 = res2.results;
+        setHasMore(res2.page < res2.total_pages);
+      } else {
+        const res1 = await getTrendingMovies(startPage, language);
+        const res2 = await getTrendingMovies(startPage + 1, language);
+        p1 = res1.results;
+        p2 = res2.results;
+        setHasMore(res2.page < res2.total_pages);
+      }
+
+      const batch = [...p1, ...p2].slice(0, 36);
+      setDisplayMovies(prev => startPage === 1 ? batch : [...prev, ...batch]);
+      setTmdbPage(startPage + 2);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsBatchLoading(false);
     }
-    if (isFiltering) {
-      return {
-        isLoading: isDiscoverLoading,
-        error: discoverError,
-        movies: discoverData?.pages.flatMap((page) => page.results),
-        hasNextPage: hasNextDiscover,
-        isFetchingNextPage: isFetchingNextDiscover,
-        fetchNextPage: fetchNextDiscover,
-      };
+  };
+
+  // Initial load, search reset, and language change
+  useEffect(() => {
+    setDisplayMovies([]);
+    setTmdbPage(1);
+    fetchBatch(1, searchQuery);
+  }, [searchQuery, language]);
+
+  useEffect(() => {
+    if (featuredMovies.length > 0) {
+      const interval = setInterval(() => {
+        setActiveSlide((prev) => (prev + 1) % featuredMovies.length);
+      }, 6000);
+      return () => clearInterval(interval);
     }
-    return {
-      isLoading: isTrendingLoading,
-      error: trendingError,
-      movies: trendingData?.pages.flatMap((page) => page.results),
-      hasNextPage: hasNextTrending,
-      isFetchingNextPage: isFetchingNextTrending,
-      fetchNextPage: fetchNextTrending,
-    };
+  }, [featuredMovies.length]);
+
+  const handleLoadMore = () => {
+    fetchBatch(tmdbPage, searchQuery);
   };
-
-  const {
-    isLoading,
-    error,
-    movies,
-    hasNextPage,
-    isFetchingNextPage,
-    fetchNextPage,
-  } = getActiveContent();
-
-  const handleSearch = (query: string) => {
-    setSearchQuery(query);
-    if (query) setSelectedGenre(null); // Reset genre filter when searching
-  };
-
-  const handleGenreClick = (id: number) => {
-    setSelectedGenre((prev) => (prev === id ? null : id));
-    setSearchQuery(""); // Reset search when filtering by genre
-  };
-
-  // Featured movie for hero section
-  const featuredMovie = trendingData?.pages[0]?.results[0];
 
   return (
     <div className="animate-fade-in">
-      <SEO title="Home" />
+      <SEO title={t("nav.home", language)} />
 
-      {/* Hero Section — only shows when browsing trending (no search/filter) */}
-      {!isSearching && !isFiltering && featuredMovie && (
-        <section className="relative min-h-[480px] h-[75vh] md:h-[80vh] md:min-h-[600px] w-full overflow-hidden">
-          {/* Backdrop image */}
-          <img
-            src={getImageUrl(featuredMovie.backdrop_path, "w1280")}
-            alt=""
-            className="absolute inset-0 w-full h-full object-cover"
-            loading="eager"
-          />
+      {/* Hero Section */}
+      {!isSearching && featuredMovies.length > 0 && (
+        <section className="relative h-screen min-h-[700px] w-full overflow-hidden">
+          {featuredMovies.map((movie, index) => (
+            <div
+              key={movie.id}
+              className={`absolute inset-0 transition-all duration-1000 ease-in-out ${index === activeSlide ? "opacity-100 scale-100" : "opacity-0 scale-105 pointer-events-none"
+                }`}
+            >
+              <div className="absolute inset-0">
+                <img
+                  src={getImageUrl(movie.backdrop_path, "w1280")}
+                  alt=""
+                  className="w-full h-full object-cover object-[center_20%]"
+                  loading={index === 0 ? "eager" : "lazy"}
+                />
+                <div className="absolute inset-0 bg-linear-to-t from-cinema-dark via-cinema-dark/40 to-transparent" />
+                <div className="absolute inset-0 bg-linear-to-r from-cinema-dark via-transparent to-transparent" />
+              </div>
 
-          {/* Gradient overlays */}
-          <div className="absolute inset-0 bg-linear-to-t from-cinema-dark via-cinema-dark/50 to-transparent" />
-          <div className="absolute inset-0 bg-linear-to-r from-cinema-dark/80 via-cinema-dark/30 to-transparent" />
+              <div className="absolute inset-0 flex items-center pt-20">
+                <div className="container mx-auto px-4 md:px-8">
+                  <div className={`max-w-4xl transition-all duration-700 ${index === activeSlide ? "translate-y-0 opacity-100" : "translate-y-10 opacity-0"}`}>
+                    <div className="flex items-center gap-2 mb-6">
+                      <span className="flex items-center gap-1.5 px-3 py-1.5 bg-cinema-accent text-black rounded-lg text-[10px] font-black uppercase tracking-wider">
+                        <TrendingUp className="w-3.5 h-3.5" />
+                        {t("home.trending", language)} #{index + 1}
+                      </span>
+                      <span className="flex items-center gap-1.5 px-3 py-1.5 bg-white/10 backdrop-blur-md border border-white/10 rounded-lg text-white text-[10px] font-black uppercase tracking-wider">
+                        <Star className="w-3.5 h-3.5 text-cinema-accent fill-cinema-accent" />
+                        {movie.vote_average.toFixed(1)}
+                      </span>
+                    </div>
 
-          {/* Hero content */}
-          <div className="absolute bottom-0 left-0 right-0 pb-24 md:pb-32">
-            <div className="container mx-auto px-4 md:px-6">
-              <div className="max-w-2xl animate-slide-up">
-                <div className="flex items-center gap-2 mb-4">
-                  <span className="flex items-center gap-1.5 px-3 py-1 bg-cinema-accent/20 border border-cinema-accent/30 rounded-full text-cinema-accent text-xs font-semibold">
-                    <TrendingUp className="w-3 h-3" />
-                    Trending #1
-                  </span>
-                  <span className="flex items-center gap-1 px-3 py-1 bg-white/10 backdrop-blur-sm rounded-full text-white text-xs font-medium">
-                    <Star className="w-3 h-3 text-cinema-accent fill-cinema-accent" />
-                    {featuredMovie.vote_average.toFixed(1)}
-                  </span>
-                </div>
+                    <h1 className="text-4xl md:text-[100px] font-black text-white mb-4 md:mb-6 leading-[0.9] md:leading-[0.85] tracking-tighter uppercase drop-shadow-2xl">
+                      {movie.title}
+                    </h1>
 
-                <h1 className="text-4xl md:text-6xl font-extrabold text-white mb-4 leading-tight tracking-tight">
-                  {featuredMovie.title}
-                </h1>
+                    <p className="text-sm md:text-xl text-gray-200 leading-relaxed mb-8 md:mb-10 line-clamp-3 md:line-clamp-2 max-w-2xl font-medium drop-shadow-lg">
+                      {movie.overview}
+                    </p>
 
-                <p className="text-sm md:text-base text-gray-300 leading-relaxed mb-6 line-clamp-3">
-                  {featuredMovie.overview}
-                </p>
-
-                <div className="flex items-center gap-3">
-                  <Link
-                    to={`/movie/${featuredMovie.id}`}
-                    className="inline-flex items-center gap-2 px-6 py-3 bg-cinema-accent hover:bg-amber-500 text-black font-bold rounded-xl transition-all duration-300 hover:shadow-lg hover:shadow-cinema-accent/25 text-sm"
-                    id="hero-view-details"
-                  >
-                    <Sparkles className="w-4 h-4" />
-                    View Details
-                  </Link>
-                  <span className="text-sm text-gray-400">
-                    {featuredMovie.release_date
-                      ? new Date(featuredMovie.release_date).getFullYear()
-                      : ""}
-                  </span>
+                    <div className="flex items-center gap-4">
+                      <Link
+                        to={`/movie/${movie.id}`}
+                        className="inline-flex items-center gap-3 px-8 md:px-10 py-3.5 md:py-4 bg-cinema-accent hover:bg-amber-500 text-black font-black rounded-2xl transition-all duration-300 text-[10px] md:text-xs uppercase tracking-widest shadow-2xl shadow-cinema-accent/30 active:scale-95"
+                      >
+                        <Play className="w-3.5 h-3.5 md:w-4 md:h-4 fill-current" />
+                        {t("home.viewDetails", language)}
+                      </Link>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
+          ))}
+
+          {/* Slide Indicators */}
+          <div className="absolute bottom-8 md:bottom-12 right-4 md:right-12 flex items-center gap-2 z-30">
+             <span className="text-[9px] md:text-[10px] font-black text-white/40 uppercase tracking-[0.2em] mr-2 md:mr-4 hidden sm:block">{t("home.highlights", language)}</span>
+            {featuredMovies.map((_, index) => (
+              <button
+                key={index}
+                onClick={() => setActiveSlide(index)}
+                className={`transition-all duration-300 rounded-full ${
+                  index === activeSlide ? "w-8 md:w-10 h-1 md:h-1.5 bg-cinema-accent" : "w-1.5 md:w-2 h-1 md:h-1.5 bg-white/20 hover:bg-white/40"
+                }`}
+                aria-label={`Go to slide ${index + 1}`}
+              />
+            ))}
           </div>
         </section>
       )}
 
       {/* Main content area */}
-      <div
-        className={`container mx-auto px-4 md:px-6 ${!isSearching && !isFiltering && featuredMovie ? "-mt-12 relative z-20" : "pt-24"
-          }`}
-      >
-        {/* Search bar */}
-        <div className="mb-8">
-          <SearchBar onSearch={handleSearch} />
-        </div>
+      <div className={`container mx-auto px-4 md:px-8 ${!isSearching && featuredMovies.length > 0 ? "pt-10 md:pt-12 relative z-20" : "pt-28"}`}>
 
-        {/* Genre Filter */}
-        {!isSearching && genresData && (
-          <div className="mb-8">
-            <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
-              <button
-                onClick={() => setSelectedGenre(null)}
-                className={`flex-shrink-0 px-4 py-1.5 rounded-full text-xs font-semibold transition-all duration-200 border ${selectedGenre === null
-                  ? "bg-cinema-accent text-black border-cinema-accent shadow-lg shadow-cinema-accent/30 scale-105"
-                  : "bg-cinema-card/60 text-gray-400 border-cinema-border hover:text-white hover:border-gray-500 hover:bg-cinema-card"
-                  }`}
-              >
-                All
-              </button>
-              {genresData.genres.map((genre) => (
+        {/* Spotlight Section */}
+        {!isSearching && topRatedData && (
+          <div className="mb-12 md:mb-24 animate-slide-up relative">
+            <div className="flex items-center justify-between mb-6 md:mb-8">
+              <div>
+                <h2 className="text-xl md:text-2xl font-black text-white uppercase tracking-tight flex items-center gap-2 md:gap-3">
+                  <Sparkles className="w-5 md:w-6 h-5 md:h-6 text-cinema-accent" />
+                  {t("home.criticsChoice", language)}
+                </h2>
+                <p className="text-[9px] md:text-[10px] font-bold text-gray-500 uppercase tracking-widest mt-1">{t("home.highRatedGems", language)}</p>
+              </div>
+
+              {/* Slide Assistance Buttons */}
+              <div className="hidden md:flex items-center gap-2">
                 <button
-                  key={genre.id}
-                  onClick={() => handleGenreClick(genre.id)}
-                  className={`flex-shrink-0 px-4 py-1.5 rounded-full text-xs font-semibold transition-all duration-200 border whitespace-nowrap ${selectedGenre === genre.id
-                    ? "bg-cinema-accent text-black border-cinema-accent shadow-lg shadow-cinema-accent/30 scale-105"
-                    : "bg-cinema-card/60 text-gray-400 border-cinema-border hover:text-white hover:border-gray-500 hover:bg-cinema-card"
-                    }`}
+                  onClick={() => {
+                    const el = document.getElementById("critics-scroll");
+                    if (el) el.scrollBy({ left: -el.offsetWidth, behavior: "smooth" });
+                  }}
+                  className="w-10 h-10 flex items-center justify-center rounded-xl bg-white/5 border border-white/10 text-white hover:bg-white/10 hover:border-cinema-accent transition-all"
                 >
-                  {genre.name}
+                  <ChevronLeft className="w-5 h-5" />
                 </button>
+                <button
+                  onClick={() => {
+                    const el = document.getElementById("critics-scroll");
+                    if (el) el.scrollBy({ left: el.offsetWidth, behavior: "smooth" });
+                  }}
+                  className="w-10 h-10 flex items-center justify-center rounded-xl bg-white/5 border border-white/10 text-white hover:bg-white/10 hover:border-cinema-accent transition-all"
+                >
+                  <ChevronRight className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+
+            <div
+              id="critics-scroll"
+              className="flex gap-5 overflow-x-auto pb-4 scrollbar-hide snap-x scroll-smooth"
+            >
+              {topRatedData.results.slice(0, 12).map((movie) => (
+                <div key={movie.id} className="shrink-0 w-40 sm:w-[calc(100%/3-1rem)] md:w-[calc(100%/4-1rem)] lg:w-[calc(100%/5-1rem)] xl:w-[calc(100%/6-1.1rem)] snap-start">
+                  <MovieCard movie={movie} />
+                </div>
               ))}
             </div>
           </div>
         )}
 
-        {/* Error state */}
-        {error && (
-          <div className="text-center py-12 bg-red-500/5 border border-red-500/20 rounded-xl mb-8">
-            <p className="text-red-400 font-medium">
-              Something went wrong:{" "}
-              {error instanceof Error ? error.message : "Unknown error"}
-            </p>
-          </div>
-        )}
+        {/* Section header */}
+        <div className="flex items-center gap-3 md:gap-4 mb-6 md:mb-10">
+          <h2 className="text-xl md:text-2xl font-black text-white uppercase tracking-tight">
+            {isSearching ? `${t("home.searchResultsFor", language)} "${searchQuery}"` : t("home.globalFeed", language)}
+          </h2>
+          <div className="flex-1 h-px bg-white/10" />
+        </div>
 
-        {/* Loading state */}
-        {isLoading ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-5">
-            {[...Array(10)].map((_, i) => (
+        {/* Grid with Load More */}
+        {isBatchLoading && displayMovies.length === 0 ? (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-5 mb-20">
+            {[...Array(12)].map((_, i) => (
               <MovieCardSkeleton key={i} />
             ))}
           </div>
         ) : (
           <>
-            {/* Section header */}
-            <div className="flex items-center gap-3 mb-6">
-              <h2 className="text-xl md:text-2xl font-bold text-white">
-                {isSearching
-                  ? `Results for "${searchQuery}"`
-                  : isFiltering
-                    ? `${genresData?.genres.find((g) => g.id === selectedGenre)?.name} Movies`
-                    : "Trending This Week"}
-              </h2>
-              <div className="flex-1 h-px bg-linear-to-r from-cinema-border to-transparent" />
-            </div>
-
-            {/* Empty state */}
-            {movies?.length === 0 && (
-              <div className="text-center py-20 bg-cinema-card/50 border border-cinema-border rounded-xl">
-                <p className="text-gray-500 text-lg">No movies found.</p>
-                <p className="text-gray-600 text-sm mt-1">
-                  Try a different search or genre.
-                </p>
-              </div>
-            )}
-
-            {/* Movie grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-5 mb-8">
-              {movies?.map((movie) => (
-                <MovieCard
-                  key={`${movie.id}-${movie.genre_ids?.join("-")}`}
-                  movie={movie}
-                />
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-5 mb-10">
+              {displayMovies.map((movie) => (
+                <MovieCard key={movie.id} movie={movie} />
               ))}
             </div>
 
+            {/* Shimmer for loading next */}
+            {isBatchLoading && (
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-5 mb-10">
+                {[...Array(6)].map((_, i) => (
+                  <MovieCardSkeleton key={`loading-${i}`} />
+                ))}
+              </div>
+            )}
+
             {/* Load More Button */}
-            {hasNextPage && (
-              <div className="flex justify-center py-8">
+            {hasMore && (
+              <div className="flex justify-center py-12">
                 <button
-                  onClick={() => fetchNextPage()}
-                  disabled={isFetchingNextPage}
-                  className="group flex items-center gap-2 px-8 py-3 bg-cinema-card hover:bg-cinema-surface text-white rounded-xl font-semibold transition-all duration-300 border border-cinema-border hover:border-cinema-accent/30 disabled:opacity-50 disabled:cursor-not-allowed text-sm hover:shadow-lg hover:shadow-cinema-accent/5"
-                  id="load-more-movies"
+                  onClick={handleLoadMore}
+                  disabled={isBatchLoading}
+                  className="group relative inline-flex items-center gap-3 px-12 py-4 bg-white/5 border border-white/10 hover:border-cinema-accent rounded-2xl text-white font-black uppercase tracking-[0.2em] text-[10px] transition-all duration-300 hover:bg-white/10 disabled:opacity-50"
                 >
-                  {isFetchingNextPage ? (
+                  {isBatchLoading ? (
                     <>
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                      Loading more...
+                      <Loader2 className="w-4 h-4 animate-spin text-cinema-accent" />
+                      {t("home.loadingBatch", language)}
                     </>
                   ) : (
-                    "Load More Movies"
+                    <>
+                      <span>{t("home.loadMore", language)}</span>
+                      <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                    </>
                   )}
                 </button>
+              </div>
+            )}
+
+            {!hasMore && displayMovies.length > 0 && (
+              <div className="text-center py-12">
+                <p className="text-[10px] font-black text-gray-600 uppercase tracking-[0.2em]">{t("home.endOfResults", language)}</p>
               </div>
             )}
           </>

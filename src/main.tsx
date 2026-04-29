@@ -5,9 +5,16 @@ import { HelmetProvider } from "react-helmet-async";
 import "./index.css";
 import App from "./App.tsx";
 import { WatchlistProvider } from "./context/WatchlistContext";
+import { SearchProvider } from "./context/SearchContext";
+import { LanguageProvider } from "./context/LanguageContext";
 import ErrorBoundary from "./components/ErrorBoundary";
 
 const queryClient = new QueryClient();
+
+// Disable browser scroll restoration to force "scroll to top" on refresh
+if ('scrollRestoration' in window.history) {
+  window.history.scrollRestoration = 'manual';
+}
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
@@ -15,7 +22,11 @@ createRoot(document.getElementById("root")!).render(
       <HelmetProvider>
         <QueryClientProvider client={queryClient}>
           <WatchlistProvider>
-            <App />
+            <SearchProvider>
+              <LanguageProvider>
+                <App />
+              </LanguageProvider>
+            </SearchProvider>
           </WatchlistProvider>
         </QueryClientProvider>
       </HelmetProvider>

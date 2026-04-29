@@ -11,7 +11,7 @@ interface SEOProps {
 const SEO: React.FC<SEOProps> = ({
   title,
   description = "Discover trending movies and more on CineHub",
-  image = "/vite.svg", // Default image
+  image = "/cinehub.svg", // Default image
   url = window.location.href,
 }) => {
   const siteTitle = "CineHub";

@@ -11,10 +11,13 @@ import {
 } from "lucide-react";
 import { useRef, useState } from "react";
 import SEO from "../components/SEO";
+import { useLanguage } from "../context/LanguageContext";
+import { t } from "../utils/translations";
 
 const PersonDetail = () => {
   const { id } = useParams<{ id: string }>();
   const personId = parseInt(id || "0");
+  const { language } = useLanguage();
 
   const {
     data: person,
@@ -59,13 +62,13 @@ const PersonDetail = () => {
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center bg-cinema-card border border-cinema-border rounded-2xl p-12">
           <p className="text-red-400 text-lg font-medium mb-4">
-            Error loading person details.
+            {t("person.errorLoading", language)}
           </p>
           <Link
             to="/"
             className="text-cinema-accent hover:underline text-sm"
           >
-            ← Back to Home
+            ← {t("person.backToHome", language)}
           </Link>
         </div>
       </div>
@@ -81,7 +84,7 @@ const PersonDetail = () => {
       })
       .slice(0, 20) || [];
 
-  const biography = person.biography || "No biography available.";
+  const biography = person.biography || t("person.noBiography", language);
   const shouldTruncateBio = biography.length > 500;
 
   return (
@@ -97,7 +100,7 @@ const PersonDetail = () => {
           className="inline-flex items-center gap-2 text-gray-400 hover:text-white mb-8 transition-colors text-sm group"
         >
           <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-          Back to Home
+          {t("person.backToHome", language)}
         </Link>
 
         <div className="flex flex-col md:flex-row gap-8 md:gap-12 mb-16">
@@ -133,7 +136,7 @@ const PersonDetail = () => {
                 <div className="flex items-center gap-2 text-gray-400 text-sm bg-cinema-card border border-cinema-border rounded-full px-4 py-2">
                   <Calendar className="w-4 h-4 text-cinema-accent" />
                   <span>
-                    Born: {new Date(person.birthday).toLocaleDateString()}
+                    {t("person.born", language)}: {new Date(person.birthday).toLocaleDateString()}
                   </span>
                 </div>
               )}
@@ -147,7 +150,7 @@ const PersonDetail = () => {
 
             <div className="mb-6">
               <h2 className="text-lg font-semibold mb-3 text-gray-200">
-                Biography
+                {t("person.biography", language)}
               </h2>
               <div className="relative">
                 <p
@@ -162,7 +165,7 @@ const PersonDetail = () => {
                     onClick={() => setShowFullBio(!showFullBio)}
                     className="mt-2 text-cinema-accent hover:text-amber-400 text-sm font-medium transition-colors"
                   >
-                    {showFullBio ? "Show less" : "Read more..."}
+                    {showFullBio ? t("person.showLess", language) : t("person.readMore", language)}
                   </button>
                 )}
               </div>
@@ -175,9 +178,9 @@ const PersonDetail = () => {
           <div>
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-3">
-                <h2 className="text-xl font-bold">Known For</h2>
+                <h2 className="text-xl font-bold">{t("person.knownFor", language)}</h2>
                 <span className="text-xs text-gray-500 bg-cinema-card border border-cinema-border rounded-full px-3 py-1">
-                  {knownForMovies.length} films
+                  {knownForMovies.length} {t("person.films", language)}
                 </span>
                 <div className="flex-1 h-px bg-linear-to-r from-cinema-border to-transparent ml-2" />
               </div>

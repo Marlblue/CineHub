@@ -2,7 +2,7 @@ import { Outlet } from "react-router-dom";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
 import { Suspense } from "react";
-import LoadingSpinner from "./LoadingSpinner";
+import TopLoader from "./TopLoader";
 
 const Layout = () => {
   return (
@@ -14,8 +14,8 @@ const Layout = () => {
       </div>
 
       <Navbar />
-      <main className="relative z-10">
-        <Suspense fallback={<LoadingSpinner />}>
+      <main className="relative">
+        <Suspense fallback={<TopLoader />}>
           <Outlet />
         </Suspense>
       </main>

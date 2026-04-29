@@ -1,6 +1,8 @@
 import { useQuery, useInfiniteQuery } from "@tanstack/react-query";
+import { useLanguage } from "../context/LanguageContext";
 import {
   getTrendingMovies,
+  getTopRatedMovies,
   getGenres,
   searchMovies,
   getMovieDetails,
@@ -11,9 +13,10 @@ import {
 } from "../api/tmdbClient";
 
 export const useTrendingMovies = () => {
+  const { language } = useLanguage();
   return useInfiniteQuery({
-    queryKey: ["trendingMovies"],
-    queryFn: ({ pageParam = 1 }) => getTrendingMovies(pageParam),
+    queryKey: ["trendingMovies", language],
+    queryFn: ({ pageParam = 1 }) => getTrendingMovies(pageParam, language),
     getNextPageParam: (lastPage) => {
       return lastPage.page < lastPage.total_pages
         ? lastPage.page + 1
@@ -24,10 +27,29 @@ export const useTrendingMovies = () => {
   });
 };
 
+export const useTrendingMoviesPaged = (page: number) => {
+  const { language } = useLanguage();
+  return useQuery({
+    queryKey: ["trendingMoviesPaged", page, language],
+    queryFn: () => getTrendingMovies(page, language),
+    staleTime: 1000 * 60 * 5,
+  });
+};
+
+export const useTopRatedMovies = () => {
+  const { language } = useLanguage();
+  return useQuery({
+    queryKey: ["topRatedMovies", language],
+    queryFn: () => getTopRatedMovies(1, language),
+    staleTime: 1000 * 60 * 60, // 1 hour
+  });
+};
+
 export const useDiscoverMovies = (genreId: number | null) => {
+  const { language } = useLanguage();
   return useInfiniteQuery({
-    queryKey: ["discoverMovies", genreId],
-    queryFn: ({ pageParam = 1 }) => getDiscoverMovies(genreId, pageParam),
+    queryKey: ["discoverMovies", genreId, language],
+    queryFn: ({ pageParam = 1 }) => getDiscoverMovies(genreId, pageParam, language),
     getNextPageParam: (lastPage) => {
       return lastPage.page < lastPage.total_pages
         ? lastPage.page + 1
@@ -40,17 +62,19 @@ export const useDiscoverMovies = (genreId: number | null) => {
 };
 
 export const useGenres = () => {
+  const { language } = useLanguage();
   return useQuery({
-    queryKey: ["genres"],
-    queryFn: getGenres,
+    queryKey: ["genres", language],
+    queryFn: () => getGenres(language),
     staleTime: 1000 * 60 * 60 * 24, // 24 hours
   });
 };
 
 export const useSearchMovies = (query: string) => {
+  const { language } = useLanguage();
   return useInfiniteQuery({
-    queryKey: ["searchMovies", query],
-    queryFn: ({ pageParam = 1 }) => searchMovies(query, pageParam),
+    queryKey: ["searchMovies", query, language],
+    queryFn: ({ pageParam = 1 }) => searchMovies(query, pageParam, language),
     getNextPageParam: (lastPage) => {
       return lastPage.page < lastPage.total_pages
         ? lastPage.page + 1
@@ -62,34 +86,48 @@ export const useSearchMovies = (query: string) => {
   });
 };
 
-export const useMovieDetails = (id: number) => {
+export const useSearchMoviesPaged = (query: string, page: number) => {
+  const { language } = useLanguage();
   return useQuery({
-    queryKey: ["movieDetails", id],
-    queryFn: () => getMovieDetails(id),
+    queryKey: ["searchMoviesPaged", query, page, language],
+    queryFn: () => searchMovies(query, page, language),
+    enabled: !!query,
+    staleTime: 1000 * 60,
+  });
+};
+
+export const useMovieDetails = (id: number) => {
+  const { language } = useLanguage();
+  return useQuery({
+    queryKey: ["movieDetails", id, language],
+    queryFn: () => getMovieDetails(id, language),
     enabled: !!id,
   });
 };
 
 export const useMovieCredits = (id: number) => {
+  const { language } = useLanguage();
   return useQuery({
-    queryKey: ["movieCredits", id],
-    queryFn: () => getMovieCredits(id),
+    queryKey: ["movieCredits", id, language],
+    queryFn: () => getMovieCredits(id, language),
     enabled: !!id,
   });
 };
 
 export const useMovieVideos = (id: number) => {
+  const { language } = useLanguage();
   return useQuery({
-    queryKey: ["movieVideos", id],
-    queryFn: () => getMovieVideos(id),
+    queryKey: ["movieVideos", id, language],
+    queryFn: () => getMovieVideos(id, language),
     enabled: !!id,
   });
 };
 
 export const useMovieRecommendations = (id: number) => {
+  const { language } = useLanguage();
   return useQuery({
-    queryKey: ["movieRecommendations", id],
-    queryFn: () => getMovieRecommendations(id),
+    queryKey: ["movieRecommendations", id, language],
+    queryFn: () => getMovieRecommendations(id, language),
     enabled: !!id,
   });
 };

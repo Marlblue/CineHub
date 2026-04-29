@@ -1,4 +1,6 @@
 import React from "react";
+import { t } from "../utils/translations";
+import type { Language } from "../utils/translations";
 
 interface ErrorBoundaryProps {
   children: React.ReactNode;
@@ -26,21 +28,26 @@ class ErrorBoundary extends React.Component<
     console.error("ErrorBoundary caught an error:", error, errorInfo);
   }
 
+  private getLanguage(): Language {
+    return (localStorage.getItem("cinehub-lang") as Language) || "en-US";
+  }
+
   render() {
     if (this.state.hasError) {
+      const lang = this.getLanguage();
       return (
         <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white p-4">
           <div className="text-center max-w-lg">
-            <h1 className="text-4xl font-bold mb-4 text-red-500">Oops!</h1>
-            <p className="text-xl mb-4">Something went wrong.</p>
+            <h1 className="text-4xl font-bold mb-4 text-red-500">{t("error.oops", lang)}</h1>
+            <p className="text-xl mb-4">{t("error.somethingWrong", lang)}</p>
             <p className="text-gray-400 mb-8">
-              We apologize for the inconvenience. Please try refreshing the page.
+              {t("error.apology", lang)}
             </p>
             <button
               onClick={() => window.location.reload()}
               className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded transition-colors"
             >
-              Refresh Page
+              {t("error.refreshPage", lang)}
             </button>
             {import.meta.env.DEV && this.state.error && (
               <div className="mt-8 p-4 bg-gray-800 rounded text-left overflow-auto max-h-64">
