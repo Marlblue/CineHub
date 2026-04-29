@@ -12,7 +12,7 @@
 
 **CineHub** is a high-end, immersive web application designed for cinema enthusiasts. Built with cutting-edge technology, it delivers a stunning cinematic browsing experience featuring fluid animations, glassmorphism aesthetics, and real-time data powered by TMDB.
 
-[**Live Demo**](https://cinehub.netlify.app) | [**Get Started**](#-getting-started)
+[**Live Demo**](https://marlblue-cinehub.netlify.app/) | [**Get Started**](#-getting-started)
 
 </div>
 
@@ -21,6 +21,7 @@
 - 🎭 **Cinematic Glass-UI** — A premium design system utilizing deep gradients, backdrop filters, and mesh backgrounds for a truly immersive feel.
 - 🔥 **Trending & Discover** — Real-time updates on what's hot in the world of cinema, powered by the TMDB API.
 - 🔍 **Pro Search Experience** — Instant, debounced search results with a sleek overlay interface and visual feedback.
+- 🔀 **Surprise Me** — Feeling indecisive? Let CineHub pick a highly-rated trending movie for you with a single click.
 - 📋 **Persistent Watchlist** — Save your "must-watch" movies to your personal collection, synced with local storage.
 - 🎬 **Deep Movie Insights** — Comprehensive details including cast profiles, trailers, and intelligent recommendations.
 - 📱 **Adaptive Design** — Perfectly optimized for everything from ultra-wide monitors to the smallest smartphone screens.
