@@ -109,13 +109,6 @@ const Navbar = () => {
 
           {/* Nav Links */}
           <div className={`items-center gap-1 ${isSearchOpen ? "hidden lg:flex" : "hidden md:flex"}`}>
-            {/* <button
-              onClick={() => setLanguage(language === "en-US" ? "id-ID" : "en-US")}
-              className="px-3 py-1.5 rounded-lg text-[10px] font-black border border-white/10 text-gray-400 hover:text-white hover:border-white/30 transition-all uppercase tracking-widest mr-1"
-            >
-              {language === "en-US" ? "EN" : "ID"}
-            </button>
-            <div className="w-px h-4 bg-white/10 mx-1" /> */}
             <button
               onClick={handleSurpriseMe}
               title={t("nav.surpriseMe", language)}
@@ -157,14 +150,8 @@ const Navbar = () => {
             </Link>
           </div>
 
-          {/* Search Toggle & Language (Mobile) */}
+          {/* Search Toggle (Mobile) */}
           <div className="flex items-center gap-1 md:hidden">
-            {/* <button
-              onClick={() => setLanguage(language === "en-US" ? "id-ID" : "en-US")}
-              className="px-2 py-1 rounded-lg text-[9px] font-black border border-white/10 text-gray-400 active:bg-white/10 transition-all uppercase tracking-tighter"
-            >
-              {language === "en-US" ? "EN" : "ID"}
-            </button> */}
             <button 
               onClick={handleSurpriseMe}
               className="p-2 text-gray-400 hover:text-white"
@@ -199,16 +186,6 @@ const Navbar = () => {
         }`}
       >
         <div className="glass-dark rounded-xl p-4 space-y-4">
-          {/* <div className="flex items-center justify-between pb-2 border-b border-white/5">
-             <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest">{t("nav.settings", language)}</span>
-             <button
-                onClick={() => setLanguage(language === "en-US" ? "id-ID" : "en-US")}
-                className="px-3 py-1 bg-cinema-accent text-black text-[10px] font-black rounded-lg uppercase tracking-widest"
-              >
-                {language === "en-US" ? "EN" : "ID"}
-              </button>
-          </div> */}
-          
           <div className="space-y-1">
             <Link
               to="/"

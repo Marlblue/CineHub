@@ -16,6 +16,15 @@ vi.mock("../hooks/useMovies", () => ({
   }),
 }));
 
+// Mock useWatchlist hook
+vi.mock("../context/WatchlistContext", () => ({
+  useWatchlist: () => ({
+    addToWatchlist: vi.fn(),
+    removeFromWatchlist: vi.fn(),
+    isInWatchlist: () => false,
+  }),
+}));
+
 const mockMovie: Movie = {
   id: 1,
   title: "Test Movie",
@@ -52,9 +61,9 @@ describe("MovieCard", () => {
       </BrowserRouter>,
     );
 
-    // Should display genre names joined by dot
+    // Should display only the first genre name (component logic)
     expect(screen.getByText(/Action/)).toBeInTheDocument();
-    expect(screen.getByText(/Adventure/)).toBeInTheDocument();
+    expect(screen.queryByText(/Adventure/)).not.toBeInTheDocument();
   });
 
   it("renders release year", () => {

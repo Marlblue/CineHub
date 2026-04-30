@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { getImageUrl } from "./image";
+import { getImageUrl } from "../utils/image";
 
 describe("getImageUrl", () => {
   it("returns the full image URL when path is provided", () => {
