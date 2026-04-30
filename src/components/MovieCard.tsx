@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, memo } from "react";
 import { Link } from "react-router-dom";
 import { Star, Heart, Plus } from "lucide-react";
 import type { Movie, MovieDetail } from "../types/tmdb";
@@ -42,7 +42,7 @@ const MovieCard: React.FC<MovieCardProps> = ({ movie }) => {
       <div className="relative aspect-[2/3] bg-cinema-surface overflow-hidden">
         {!imageError ? (
           <img
-            src={getImageUrl(movie.poster_path, "w500")}
+            src={getImageUrl(movie.poster_path, "w342")}
             alt={movie.title}
             className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
             loading="lazy"
@@ -96,4 +96,4 @@ const MovieCard: React.FC<MovieCardProps> = ({ movie }) => {
   );
 };
 
-export default MovieCard;
+export default memo(MovieCard);

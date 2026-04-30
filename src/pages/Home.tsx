@@ -21,6 +21,7 @@ const Home = () => {
   const [tmdbPage, setTmdbPage] = useState(1);
   const [isBatchLoading, setIsBatchLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
+  const [touchStart, setTouchStart] = useState<number | null>(null);
 
   // Still need infinite for the Hero slider (gets page 1)
   const { data: trendingInfinite } = useTrendingMovies();
@@ -30,28 +31,30 @@ const Home = () => {
   const { language } = useLanguage();
   const isSearching = !!searchQuery;
 
-  // Function to fetch 36 movies (requires ~2 TMDB pages)
+  // Function to fetch 20 movies (1 TMDB page) for faster initial load
   const fetchBatch = async (startPage: number, query?: string) => {
     setIsBatchLoading(true);
     try {
-      let p1, p2;
+      let results;
+      let total_pages;
+      let current_page;
+
       if (query) {
-        const res1 = await searchMovies(query, startPage, language);
-        const res2 = await searchMovies(query, startPage + 1, language);
-        p1 = res1.results;
-        p2 = res2.results;
-        setHasMore(res2.page < res2.total_pages);
+        const res = await searchMovies(query, startPage, language);
+        results = res.results;
+        total_pages = res.total_pages;
+        current_page = res.page;
       } else {
-        const res1 = await getTrendingMovies(startPage, language);
-        const res2 = await getTrendingMovies(startPage + 1, language);
-        p1 = res1.results;
-        p2 = res2.results;
-        setHasMore(res2.page < res2.total_pages);
+        const res = await getTrendingMovies(startPage, language);
+        results = res.results;
+        total_pages = res.total_pages;
+        current_page = res.page;
       }
 
-      const batch = [...p1, ...p2].slice(0, 36);
-      setDisplayMovies(prev => startPage === 1 ? batch : [...prev, ...batch]);
-      setTmdbPage(startPage + 2);
+      const moviesToDisplay = results.slice(0, 18);
+      setDisplayMovies(prev => startPage === 1 ? moviesToDisplay : [...prev, ...moviesToDisplay]);
+      setHasMore(current_page < total_pages);
+      setTmdbPage(startPage + 1);
     } catch (err) {
       console.error(err);
     } finally {
@@ -79,66 +82,101 @@ const Home = () => {
     fetchBatch(tmdbPage, searchQuery);
   };
 
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStart === null) return;
+    const touchEnd = e.changedTouches[0].clientX;
+    const diff = touchStart - touchEnd;
+
+    // Threshold of 50px for swipe
+    if (Math.abs(diff) > 50) {
+      if (diff > 0) {
+        // Swipe left -> Next slide
+        setActiveSlide((prev) => (prev + 1) % featuredMovies.length);
+      } else {
+        // Swipe right -> Prev slide
+        setActiveSlide((prev) => (prev - 1 + featuredMovies.length) % featuredMovies.length);
+      }
+    }
+    setTouchStart(null);
+  };
+
   return (
     <div className="animate-fade-in">
       <SEO title={t("nav.home", language)} />
 
       {/* Hero Section */}
       {!isSearching && featuredMovies.length > 0 && (
-        <section className="relative h-screen min-h-[700px] w-full overflow-hidden">
-          {featuredMovies.map((movie, index) => (
-            <div
-              key={movie.id}
-              className={`absolute inset-0 transition-all duration-1000 ease-in-out ${index === activeSlide ? "opacity-100 scale-100" : "opacity-0 scale-105 pointer-events-none"
-                }`}
-            >
-              <div className="absolute inset-0">
-                <img
-                  src={getImageUrl(movie.backdrop_path, "w1280")}
-                  alt=""
-                  className="w-full h-full object-cover object-[center_20%]"
-                  loading={index === 0 ? "eager" : "lazy"}
-                />
-                <div className="absolute inset-0 bg-linear-to-t from-cinema-dark via-cinema-dark/40 to-transparent" />
-                <div className="absolute inset-0 bg-linear-to-r from-cinema-dark via-transparent to-transparent" />
-              </div>
+        <section 
+          className="relative h-screen min-h-[700px] w-full overflow-hidden touch-pan-y"
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
+        >
+          {featuredMovies.map((movie, index) => {
+            // Only render current, next, and previous for performance
+            const isVisible = index === activeSlide;
+            const isNearby = Math.abs(index - activeSlide) <= 1 || (activeSlide === 0 && index === featuredMovies.length - 1) || (activeSlide === featuredMovies.length - 1 && index === 0);
+            
+            if (!isNearby && !isVisible) return null;
 
-              <div className="absolute inset-0 flex items-center pt-20">
-                <div className="container mx-auto px-4 md:px-8">
-                  <div className={`max-w-4xl transition-all duration-700 ${index === activeSlide ? "translate-y-0 opacity-100" : "translate-y-10 opacity-0"}`}>
-                    <div className="flex items-center gap-2 mb-6">
-                      <span className="flex items-center gap-1.5 px-3 py-1.5 bg-cinema-accent text-black rounded-lg text-[10px] font-black uppercase tracking-wider">
-                        <TrendingUp className="w-3.5 h-3.5" />
-                        {t("home.trending", language)} #{index + 1}
-                      </span>
-                      <span className="flex items-center gap-1.5 px-3 py-1.5 bg-white/10 backdrop-blur-md border border-white/10 rounded-lg text-white text-[10px] font-black uppercase tracking-wider">
-                        <Star className="w-3.5 h-3.5 text-cinema-accent fill-cinema-accent" />
-                        {movie.vote_average.toFixed(1)}
-                      </span>
-                    </div>
+            return (
+              <div
+                key={movie.id}
+                className={`absolute inset-0 transition-all duration-1000 ease-in-out ${isVisible ? "opacity-100 scale-100" : "opacity-0 scale-105 pointer-events-none"
+                  }`}
+              >
+                <div className="absolute inset-0">
+                  <img
+                    src={getImageUrl(movie.backdrop_path, "w1280")}
+                    alt=""
+                    className="w-full h-full object-cover object-[center_20%]"
+                    loading={isVisible ? "eager" : "lazy"}
+                  />
+                  <div className="absolute inset-0 bg-linear-to-t from-cinema-dark via-cinema-dark/40 to-transparent" />
+                  <div className="absolute inset-0 bg-linear-to-b from-cinema-dark/80 via-cinema-dark/20 to-transparent h-1/3" />
+                  <div className="absolute inset-0 bg-linear-to-r from-cinema-dark via-transparent to-transparent" />
+                </div>
 
-                    <h1 className="text-4xl md:text-[100px] font-black text-white mb-4 md:mb-6 leading-[0.9] md:leading-[0.85] tracking-tighter uppercase drop-shadow-2xl">
-                      {movie.title}
-                    </h1>
+                <div className="absolute inset-0 flex items-center pt-20">
+                  <div className="container mx-auto px-4 md:px-8">
+                    <div className={`max-w-4xl transition-all duration-700 ${isVisible ? "translate-y-0 opacity-100" : "translate-y-10 opacity-0"}`}>
+                      <div className="flex items-center gap-2 mb-6">
+                        <span className="flex items-center gap-1.5 px-3 py-1.5 bg-cinema-accent text-black rounded-lg text-[10px] font-black uppercase tracking-wider">
+                          <TrendingUp className="w-3.5 h-3.5" />
+                          {t("home.trending", language)} #{index + 1}
+                        </span>
+                        <span className="flex items-center gap-1.5 px-3 py-1.5 bg-white/10 backdrop-blur-md border border-white/10 rounded-lg text-white text-[10px] font-black uppercase tracking-wider">
+                          <Star className="w-3.5 h-3.5 text-cinema-accent fill-cinema-accent" />
+                          {movie.vote_average.toFixed(1)}
+                        </span>
+                      </div>
 
-                    <p className="text-sm md:text-xl text-gray-200 leading-relaxed mb-8 md:mb-10 line-clamp-3 md:line-clamp-2 max-w-2xl font-medium drop-shadow-lg">
-                      {movie.overview}
-                    </p>
+                      <h1 className="text-4xl md:text-[100px] font-black text-white mb-4 md:mb-6 leading-[0.9] md:leading-[0.85] tracking-tighter uppercase drop-shadow-2xl">
+                        {movie.title}
+                      </h1>
 
-                    <div className="flex items-center gap-4">
-                      <Link
-                        to={`/movie/${movie.id}`}
-                        className="inline-flex items-center gap-3 px-8 md:px-10 py-3.5 md:py-4 bg-cinema-accent hover:bg-amber-500 text-black font-black rounded-2xl transition-all duration-300 text-[10px] md:text-xs uppercase tracking-widest shadow-2xl shadow-cinema-accent/30 active:scale-95"
-                      >
-                        <Play className="w-3.5 h-3.5 md:w-4 md:h-4 fill-current" />
-                        {t("home.viewDetails", language)}
-                      </Link>
+                      <p className="text-sm md:text-xl text-gray-200 leading-relaxed mb-8 md:mb-10 line-clamp-3 md:line-clamp-2 max-w-2xl font-medium drop-shadow-lg">
+                        {movie.overview}
+                      </p>
+
+                      <div className="flex items-center gap-4">
+                        <Link
+                          to={`/movie/${movie.id}`}
+                          className="inline-flex items-center gap-3 px-8 md:px-10 py-3.5 md:py-4 bg-cinema-accent hover:bg-amber-500 text-black font-black rounded-2xl transition-all duration-300 text-[10px] md:text-xs uppercase tracking-widest shadow-2xl shadow-cinema-accent/30 active:scale-95"
+                        >
+                          <Play className="w-3.5 h-3.5 md:w-4 md:h-4 fill-current" />
+                          {t("home.viewDetails", language)}
+                        </Link>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
 
           {/* Slide Indicators */}
           <div className="absolute bottom-8 md:bottom-12 right-4 md:right-12 flex items-center gap-2 z-30">
@@ -215,20 +253,12 @@ const Home = () => {
           <div className="flex-1 h-px bg-white/10" />
         </div>
 
-        {/* Grid with Load More */}
-        {isBatchLoading && displayMovies.length === 0 ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-5 mb-20">
-            {[...Array(12)].map((_, i) => (
-              <MovieCardSkeleton key={i} />
-            ))}
-          </div>
-        ) : (
-          <>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-5 mb-10">
-              {displayMovies.map((movie) => (
-                <MovieCard key={movie.id} movie={movie} />
-              ))}
-            </div>
+        {/* Grid Area */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-5 mb-10">
+          {displayMovies.map((movie) => (
+            <MovieCard key={movie.id} movie={movie} />
+          ))}
+        </div>
 
             {/* Shimmer for loading next */}
             {isBatchLoading && (
@@ -267,8 +297,6 @@ const Home = () => {
                 <p className="text-[10px] font-black text-gray-600 uppercase tracking-[0.2em]">{t("home.endOfResults", language)}</p>
               </div>
             )}
-          </>
-        )}
       </div>
     </div>
   );

@@ -2,7 +2,6 @@ import { Outlet } from "react-router-dom";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
 import { Suspense } from "react";
-import TopLoader from "./TopLoader";
 
 const Layout = () => {
   return (
@@ -15,7 +14,7 @@ const Layout = () => {
 
       <Navbar />
       <main className="relative">
-        <Suspense fallback={<TopLoader />}>
+        <Suspense fallback={null}>
           <Outlet />
         </Suspense>
       </main>

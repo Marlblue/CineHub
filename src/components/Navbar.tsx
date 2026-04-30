@@ -69,10 +69,10 @@ const Navbar = () => {
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 px-4 py-4 md:px-8">
       <div
-        className={`container mx-auto transition-all duration-300 rounded-xl ${
+        className={`container mx-auto transition-all duration-300 rounded-2xl ${
           scrolled || isSearchOpen
-            ? "glass-dark shadow-xl py-2 px-6"
-            : "bg-transparent py-2 px-0"
+            ? "glass-dark shadow-2xl py-2.5 px-6"
+            : "bg-black/20 backdrop-blur-md border border-white/5 py-2.5 px-6"
         }`}
       >
         <div className="flex items-center justify-between gap-4">

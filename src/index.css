@@ -63,11 +63,11 @@
 @layer utilities {
   .glass {
     /* Reduced blur for better performance */
-    @apply bg-white/[0.03] backdrop-blur-md border border-white/10;
+    @apply bg-white/[0.03] backdrop-blur border border-white/10;
   }
   
   .glass-dark {
-    @apply bg-black/40 backdrop-blur-lg border border-white/5;
+    @apply bg-black/40 backdrop-blur-md border border-white/5;
   }
 
   .text-gradient {
