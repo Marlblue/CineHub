@@ -2,10 +2,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import {
   useTrendingMovies,
-  useSearchMovies,
   useTopRatedMovies,
-  useTrendingMoviesPaged,
-  useSearchMoviesPaged,
 } from "../hooks/useMovies";
 import { getTrendingMovies, searchMovies } from "../api/tmdbClient";
 import MovieCard from "../components/MovieCard";
@@ -145,14 +142,13 @@ const Home = () => {
 
           {/* Slide Indicators */}
           <div className="absolute bottom-8 md:bottom-12 right-4 md:right-12 flex items-center gap-2 z-30">
-             <span className="text-[9px] md:text-[10px] font-black text-white/40 uppercase tracking-[0.2em] mr-2 md:mr-4 hidden sm:block">{t("home.highlights", language)}</span>
+            <span className="text-[9px] md:text-[10px] font-black text-white/40 uppercase tracking-[0.2em] mr-2 md:mr-4 hidden sm:block">{t("home.highlights", language)}</span>
             {featuredMovies.map((_, index) => (
               <button
                 key={index}
                 onClick={() => setActiveSlide(index)}
-                className={`transition-all duration-300 rounded-full ${
-                  index === activeSlide ? "w-8 md:w-10 h-1 md:h-1.5 bg-cinema-accent" : "w-1.5 md:w-2 h-1 md:h-1.5 bg-white/20 hover:bg-white/40"
-                }`}
+                className={`transition-all duration-300 rounded-full ${index === activeSlide ? "w-8 md:w-10 h-1 md:h-1.5 bg-cinema-accent" : "w-1.5 md:w-2 h-1 md:h-1.5 bg-white/20 hover:bg-white/40"
+                  }`}
                 aria-label={`Go to slide ${index + 1}`}
               />
             ))}
