@@ -12,7 +12,7 @@
 
 **CineHub** is a high-end, immersive web application designed for cinema enthusiasts. Built with cutting-edge technology, it delivers a stunning cinematic browsing experience featuring fluid animations, glassmorphism aesthetics, and real-time data powered by TMDB.
 
-[**Live Demo**](https://marlblue-cinehub.netlify.app/) | [**Get Started**](#-getting-started)
+[**Live Demo**](https://cinehub.netlify.app) | [**Explore Features**](#-key-features) | [**Get Started**](#-getting-started)
 
 </div>
 
@@ -23,7 +23,7 @@
 - 🔍 **Pro Search Experience** — Instant, debounced search results with a sleek overlay interface and visual feedback.
 - 🔀 **Surprise Me** — Feeling indecisive? Let CineHub pick a highly-rated trending movie for you with a single click.
 - 📋 **Persistent Watchlist** — Save your "must-watch" movies to your personal collection, synced with local storage.
-- 🎬 **Deep Movie Insights** — Comprehensive details including cast profiles, trailers, and intelligent recommendations.
+- 🎬 **Deep Movie Insights** — Comprehensive details including cast profiles, box office stats, trailers, and intelligent recommendations.
 - 📱 **Adaptive Design** — Perfectly optimized for everything from ultra-wide monitors to the smallest smartphone screens.
 - ⚡ **Turbocharged Performance** — Leveraging React 19's speed, TanStack Query caching, and skeleton loading states for a lag-free experience.
 
@@ -56,8 +56,8 @@ src/
 
 ### 1. Clone the repository
 ```bash
-git clone https://github.com/Marlblue/CineHub.git
-cd CineHub
+git clone https://github.com/your-username/cinehub.git
+cd cinehub
 ```
 
 ### 2. Install dependencies
@@ -78,6 +78,9 @@ pnpm dev
 ```
 Open [http://localhost:5173](http://localhost:5173) in your browser to see the results.
 
+## 📄 License
+
+Distributed under the MIT License. See `LICENSE` for more information.
 
 ---
 

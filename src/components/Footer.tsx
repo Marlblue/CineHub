@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Film, Heart, Home, ExternalLink, Github } from "lucide-react";
+import { Heart, Home, ExternalLink, Github } from "lucide-react";
 import { useLanguage } from "../context/LanguageContext";
 import { t } from "../utils/translations";
 
@@ -22,9 +22,9 @@ const Footer = () => {
               {t("footer.description", language)}
             </p>
             <div className="flex items-center gap-4 mt-8">
-              <a 
-                href="https://github.com/Marlblue/CineHub" 
-                target="_blank" 
+              <a
+                href="https://github.com/Marlblue/CineHub"
+                target="_blank"
                 rel="noopener noreferrer"
                 className="p-2.5 glass rounded-xl text-gray-400 hover:text-white transition-all"
                 title="GitHub Repository"

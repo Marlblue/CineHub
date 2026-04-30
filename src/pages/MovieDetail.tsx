@@ -13,15 +13,7 @@ import {
   Star,
   Clock,
   Calendar,
-  Heart,
-  ArrowLeft,
-  Play,
   X,
-  ChevronLeft,
-  ChevronRight,
-  TrendingUp,
-  DollarSign,
-  Globe,
   Loader2,
 } from "lucide-react";
 import { useState, useRef } from "react";
@@ -47,16 +39,6 @@ const MovieDetail = () => {
   const [showTrailer, setShowTrailer] = useState(false);
   const castScrollRef = useRef<HTMLDivElement>(null);
   const recsScrollRef = useRef<HTMLDivElement>(null);
-
-  const scrollCarousel = (
-    ref: React.RefObject<HTMLDivElement | null>,
-    direction: "left" | "right",
-  ) => {
-    if (ref.current) {
-      const scrollAmount = direction === "left" ? -400 : 400;
-      ref.current.scrollBy({ left: scrollAmount, behavior: "smooth" });
-    }
-  };
 
   if (isMovieLoading || isCreditsLoading) {
     return (
@@ -124,11 +106,11 @@ const MovieDetail = () => {
                   </span>
                 ))}
               </div>
-              
+
               <h1 className="text-4xl md:text-6xl font-black text-white mb-4 uppercase tracking-tighter">
                 {movie.title}
               </h1>
-              
+
               <p className="text-lg text-gray-400 font-medium mb-6 italic">{movie.tagline}</p>
 
               <div className="flex flex-wrap items-center gap-6 mb-8 text-[10px] font-black text-gray-400 uppercase tracking-widest">
@@ -146,9 +128,8 @@ const MovieDetail = () => {
               <div className="flex flex-wrap gap-4">
                 <button
                   onClick={handleWatchlistClick}
-                  className={`px-8 py-3.5 rounded-xl font-black uppercase tracking-widest text-[10px] transition-all duration-200 ${
-                    isFavorite ? "bg-cinema-rose text-white" : "bg-white/5 text-white hover:bg-white/10"
-                  }`}
+                  className={`px-8 py-3.5 rounded-xl font-black uppercase tracking-widest text-[10px] transition-all duration-200 ${isFavorite ? "bg-cinema-rose text-white" : "bg-white/5 text-white hover:bg-white/10"
+                    }`}
                 >
                   {isFavorite ? t("movie.inWatchlist", language) : t("movie.addToWatchlist", language)}
                 </button>
@@ -195,20 +176,20 @@ const MovieDetail = () => {
         </div>
       </div>
 
-      {/* Trailer Modal - Moved outside the animated wrapper to fix positioning */}
+      {/* Trailer Modal */}
       {showTrailer && trailer && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/90 backdrop-blur-sm p-4" onClick={() => setShowTrailer(false)}>
           <div className="relative w-full max-w-5xl aspect-video bg-black rounded-[2rem] overflow-hidden shadow-[0_0_100px_rgba(0,0,0,1)] border border-white/10 scale-in" onClick={e => e.stopPropagation()}>
-            <button 
-              onClick={() => setShowTrailer(false)} 
+            <button
+              onClick={() => setShowTrailer(false)}
               className="absolute top-4 right-4 text-white z-10 bg-white/10 hover:bg-white/20 backdrop-blur-md p-3 rounded-full transition-all"
             >
               <X className="w-6 h-6" />
             </button>
-            <iframe 
-              src={`https://www.youtube.com/embed/${trailer.key}?autoplay=1`} 
-              title={trailer.name} 
-              className="w-full h-full" 
+            <iframe
+              src={`https://www.youtube.com/embed/${trailer.key}?autoplay=1`}
+              title={trailer.name}
+              className="w-full h-full"
               allowFullScreen
             ></iframe>
           </div>

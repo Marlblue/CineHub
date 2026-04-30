@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Film, Heart, Menu, X, Search, Shuffle } from "lucide-react";
+import { Heart, Menu, X, Search, Shuffle } from "lucide-react";
 import { useWatchlist } from "../context/WatchlistContext";
 import { useSearch } from "../context/SearchContext";
 import { useLanguage } from "../context/LanguageContext";
@@ -8,7 +8,7 @@ import { getTrendingMovies } from "../api/tmdbClient";
 import { t } from "../utils/translations";
 
 const Navbar = () => {
-  const { language, setLanguage } = useLanguage();
+  const { language } = useLanguage();
   const location = useLocation();
   const navigate = useNavigate();
   const { watchlist } = useWatchlist();
